@@ -1,11 +1,21 @@
 <script setup>
-import { ref } from 'vue';
-let items = ref(['Sai', 'Piim', 'Viin' , 'Beer', 'Tee']);
+import { computed , ref } from 'vue';
+let i = 1;
+
+let items = ref([
+    {id: i++, text: 'Sai', isDone: false},
+    {id: i++, text: 'Piim', isDone: true},
+    {id: i++, text: 'Viin', isDone: false},
+    {id: i++, text: 'Beer', isDone: true},
+]);
 let newItem = ref('');
+
+let doneItems = computed(() => items.value.filter(item => item.isDone));
+let todoItems = computed(() => items.value.filter(item => !item.isDone));
 
 function add() {
     if(newItem.value.trim() !== '') {
-    items.value.push(newItem.value.trim());
+    items.value.push({id: i++, text: newItem.value.trim(), isDone: false});
     }
     newItem.value = '';
 }
@@ -26,7 +36,26 @@ function add() {
             <div class="content">  
                 <h1>All Items</h1>
                     <ul>
-                        <li v-for="item in items">{{ item }}</li>
+                        <li v-for="item in items" :key="item.id">
+                            {{ item.text }}
+                            <input type="checkbox" v-model="item.isDone">
+                        </li>
+                    </ul>
+
+                    <h1>Done Items</h1>
+                    <ul>
+                        <li v-for="item in doneItems" :key="item.id">
+                            {{ item.text }}
+                            <input type="checkbox" v-model="item.isDone">
+                        </li>
+                    </ul>
+
+                    <h1>ToDo Items</h1>
+                    <ul>
+                        <li v-for="item in todoItems" :key="item.id">
+                            {{ item.text }}
+                            <input type="checkbox" v-model="item.isDone">
+                        </li>
                     </ul>
             </div>
     </div>
