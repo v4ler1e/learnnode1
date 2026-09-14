@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref } from "vue";
-import ItemList from "./components/ItemList.vue";
+import ItemList from "../components/ItemList.vue";
 let i = 1;
 
 let items = ref([
@@ -26,12 +26,7 @@ function add() {
   <div class="container">
     <div class="field has-addons mt-2">
       <div class="control is-expanded">
-        <input
-          v-model="newItem"
-          class="input"
-          type="text"
-          @keypress.enter="add"
-        />
+        <input v-model="newItem" class="input" type="text" @keypress.enter="add" />
       </div>
       <div class="control">
         <button class="button is-info" @click="add">Add Item</button>
