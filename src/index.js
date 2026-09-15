@@ -6,12 +6,14 @@ import ToDo from './pages/ToDo.vue';
 import Modals from './pages/Modals.vue';
 import Messages from './pages/Messages.vue';
 import Buttons from "./pages/Buttons.vue";
+import Currency from "./pages/Currency.vue";
 
 const routes = [
   { path: '/', component: ToDo , name: 'ToDo'},
   { path: '/modals', component: Modals , name: 'Modals'},
   { path: '/messages', component: Messages , name: 'Messages'},
   { path: "/buttons", component: Buttons, name: "Buttons" },
+  { path: "/currency", component: Currency, name: "Currency" }
 ];
 
 export const router = createRouter({
