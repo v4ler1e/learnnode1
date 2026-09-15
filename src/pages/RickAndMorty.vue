@@ -1,42 +1,48 @@
 <script setup>
 import axios from "axios";
-import { ref } from "vue";
+import { ref, watch } from "vue";
+
 import CharacterCard from "../components/CharacterCard.vue";
+import PaginationBar from "../components/PaginationBar.vue";
+
 let characters = ref([]);
-let info = ref({
-    count: 0,
-    pages: 0,
-    next: null,
-    prev: null,
-});
+let currentPage = ref(1);
+let totalPages = ref(0);
 
-await getCharacters("https://rickandmortyapi.com/api/character");
+let characterList = ref(null);
 
-async function getCharacters(url) {
-    const res = await axios.get(url);
+async function getCharacters(page) {
+    const res = await axios.get(
+        `https://rickandmortyapi.com/api/character?page=${page}`
+    );
+
     characters.value = res.data.results;
-    info.value = res.data.info;
+    totalPages.value = res.data.info.pages;
 }
 
+watch(
+    currentPage,
+    async (page) => {
+        await getCharacters(page);
 
-
-async function next() {
-    await getCharacters(info.value.next);
-}
-
-async function prev() {
-    await getCharacters(info.value.prev);
-}
-
+        characterList.value?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+        });
+    },
+    { immediate: true }
+);
 </script>
+
 <template>
-    <div class="is-flex is-justify-content-space-between mb-2">
-        <button class="button is-primary" :disabled="!info.prev" @click="prev">Prev</button>
-        <button class="button is-primary" :disabled="!info.next" @click="next">Next</button>
-    </div>
-    <div class="columns is-multiline">
-        <div class="column is-3" v-for="character in characters">
-            <CharacterCard :character="character"></CharacterCard>
+    <div ref="characterList">
+        <div class="columns is-multiline">
+            <div class="column is-3" v-for="character in characters" :key="character.id">
+                <CharacterCard :character="character"></CharacterCard>
+            </div>
         </div>
+
+        <PaginationBar :current-page="currentPage" :total-pages="totalPages" @page-change="currentPage = $event">
+        </PaginationBar>
     </div>
 </template>
