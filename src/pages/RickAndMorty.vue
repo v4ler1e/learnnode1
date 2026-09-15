@@ -16,8 +16,29 @@ const characterList = ref(null);
 
 const API_URL = "https://rickandmortyapi.com/api/character";
 
+let controller = null;
+
+
+function debounce(fn, delay) {
+    let timer;
+
+    return (...args) => {
+        clearTimeout(timer);
+
+        timer = setTimeout(() => {
+            fn(...args);
+        }, delay);
+    };
+}
+
+
 async function fetchCharacters(page = currentPage.value) {
-    noResults.value = false;
+    if (controller) {
+        controller.abort();
+    }
+
+    const newController = new AbortController();
+    controller = newController;
 
     const params = {
         page: page,
@@ -30,11 +51,20 @@ async function fetchCharacters(page = currentPage.value) {
     try {
         const res = await axios.get(API_URL, {
             params: params,
+            signal: newController.signal,
         });
 
         characters.value = res.data.results;
         totalPages.value = res.data.info.pages;
+        noResults.value = false;
     } catch (error) {
+        if (
+            error.code === "ERR_CANCELED" ||
+            error.name === "CanceledError"
+        ) {
+            return;
+        }
+
         if (error.response?.status === 404) {
             characters.value = [];
             totalPages.value = 0;
@@ -42,16 +72,32 @@ async function fetchCharacters(page = currentPage.value) {
         } else {
             console.error(error);
         }
+    } finally {
+        if (controller === newController) {
+            controller = null;
+        }
     }
 }
 
-async function handleSearch(query) {
+
+const debouncedFetch = debounce(() => {
+    fetchCharacters(1);
+}, 400);
+
+
+function handleSearch(query) {
     searchQuery.value = query.trim();
-
     currentPage.value = 1;
+    noResults.value = false;
 
-    await fetchCharacters(1);
+    if (controller) {
+        controller.abort();
+        controller = null;
+    }
+
+    debouncedFetch();
 }
+
 
 async function changePage(page) {
     currentPage.value = page;
@@ -63,6 +109,7 @@ async function changePage(page) {
         block: "start",
     });
 }
+
 
 fetchCharacters(1);
 </script>
