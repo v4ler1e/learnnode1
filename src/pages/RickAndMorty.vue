@@ -1,48 +1,87 @@
 <script setup>
 import axios from "axios";
-import { ref, watch } from "vue";
+import { ref } from "vue";
 
 import CharacterCard from "../components/CharacterCard.vue";
 import PaginationBar from "../components/PaginationBar.vue";
+import SearchBar from "../components/SearchBar.vue";
 
-let characters = ref([]);
-let currentPage = ref(1);
-let totalPages = ref(0);
+const characters = ref([]);
+const currentPage = ref(1);
+const totalPages = ref(0);
+const searchQuery = ref("");
+const noResults = ref(false);
 
-let characterList = ref(null);
+const characterList = ref(null);
 
-async function getCharacters(page) {
-    const res = await axios.get(
-        `https://rickandmortyapi.com/api/character?page=${page}`
-    );
+const API_URL = "https://rickandmortyapi.com/api/character";
 
-    characters.value = res.data.results;
-    totalPages.value = res.data.info.pages;
+async function fetchCharacters(page = currentPage.value) {
+    noResults.value = false;
+
+    const params = {
+        page: page,
+    };
+
+    if (searchQuery.value) {
+        params.name = searchQuery.value;
+    }
+
+    try {
+        const res = await axios.get(API_URL, {
+            params: params,
+        });
+
+        characters.value = res.data.results;
+        totalPages.value = res.data.info.pages;
+    } catch (error) {
+        if (error.response?.status === 404) {
+            characters.value = [];
+            totalPages.value = 0;
+            noResults.value = true;
+        } else {
+            console.error(error);
+        }
+    }
 }
 
-watch(
-    currentPage,
-    async (page) => {
-        await getCharacters(page);
+async function handleSearch(query) {
+    searchQuery.value = query.trim();
 
-        characterList.value?.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-        });
-    },
-    { immediate: true }
-);
+    currentPage.value = 1;
+
+    await fetchCharacters(1);
+}
+
+async function changePage(page) {
+    currentPage.value = page;
+
+    await fetchCharacters(page);
+
+    characterList.value?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+    });
+}
+
+fetchCharacters(1);
 </script>
 
 <template>
     <div ref="characterList">
-        <div class="columns is-multiline">
+        <SearchBar @search="handleSearch"></SearchBar>
+
+        <div v-if="noResults" class="notification is-warning">
+            No characters found
+        </div>
+
+        <div v-else class="columns is-multiline">
             <div class="column is-3" v-for="character in characters" :key="character.id">
                 <CharacterCard :character="character"></CharacterCard>
             </div>
         </div>
 
-        <PaginationBar :current-page="currentPage" :total-pages="totalPages" @page-change="currentPage = $event">
-        </PaginationBar>
+        <PaginationBar v-if="totalPages > 0" :current-page="currentPage" :total-pages="totalPages"
+            @page-change="changePage"></PaginationBar>
     </div>
 </template>
