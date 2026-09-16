@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "vite build"
+    "build": "vite build",
+    "deploy": "bun run build && cp ./dist/index.html ./dist/200.html && surge ./dist valeriamot.surge.sh"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -20,6 +21,7 @@
     "@vitejs/plugin-vue": "^6.0.6",
     "axios": "^1.20.0",
     "boxen": "^8.0.1",
+    "surge": "^0.44.1",
     "vue": "^3.5.34",
     "vue-router": "4"
   }
