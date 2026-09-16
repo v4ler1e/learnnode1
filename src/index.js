@@ -9,6 +9,7 @@ import Buttons from "./pages/Buttons.vue";
 import Currency from "./pages/Currency.vue";
 import RickAndMorty from "./pages/RickAndMorty.vue";
 import CanvasExample from './pages/CanvasExample.vue';
+import WebApis from './pages/WebApis.vue';
 
 const routes = [
   { path: '/', component: ToDo , name: 'ToDo'},
@@ -17,7 +18,8 @@ const routes = [
   { path: "/buttons", component: Buttons, name: "Buttons" },
   { path: "/currency", component: Currency, name: "Currency" },
   { path: "/rickandmorty", component: RickAndMorty, name: "RickAndMorty" },
-  { path: "/canvas", component: CanvasExample, name: "Canvas" }
+  { path: "/canvas", component: CanvasExample, name: "Canvas" },
+  { path: "/webapis", component: WebApis, name: "WebApis" },
 ];
 
 export const router = createRouter({
